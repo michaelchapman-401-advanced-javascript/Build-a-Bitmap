@@ -85,7 +85,12 @@ const doTheInversion = (bmp) => {
       }
     }
   }
+};
 
+const discovery = (bmp) => {
+  console.log('DISCOVER');
+
+  bmp.pixelOffset = 10;
 };
 
 const validateBMP = (bmp) => {
@@ -103,6 +108,7 @@ const validateBMP = (bmp) => {
 const transforms = {
   greyscale: transformGreyscale,
   invert: doTheInversion,
+  discover: discovery,
 };
 
 // ------------------ GET TO WORK ------------------- //
