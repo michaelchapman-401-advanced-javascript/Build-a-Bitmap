@@ -52,34 +52,47 @@ Bitmap.prototype.transform = function(operation) {
  */
 const transformGreyscale = (bmp) => {
   console.log('Transforming bitmap into greyscale', bmp);
-
-  //TODO: Figure out a way to validate that the bmp instance is actually valid before trying to transform it
-  // console.log(bmp);
-  //TODO: alter bmp to make the image greyscale ...
-  for (let i = 0; i < bmp.colorArray.length; i+=4) {
-    let gray = (bmp.colorArray[i] + bmp.colorArray[i+1] + bmp.colorArray[i+2]);
-    bmp.colorArray[i] = gray;
-    bmp.colorArray[i+1] = gray;
-    bmp.colorArray[i+2] = gray;
+  if (!validateBMP(bmp)) console.error('Invalid file type!');
+  else {
+    //TODO: Figure out a way to validate that the bmp instance is actually valid before trying to transform it
+    // console.log(bmp);
+    //TODO: alter bmp to make the image greyscale ...
+    for (let i = 0; i < bmp.colorArray.length; i+=4) {
+      let gray = (bmp.colorArray[i] + bmp.colorArray[i+1] + bmp.colorArray[i+2]);
+      bmp.colorArray[i] = gray;
+      bmp.colorArray[i+1] = gray;
+      bmp.colorArray[i+2] = gray;
+    }
   }
 };
 
 const doTheInversion = (bmp) => {
   console.log('Transforming bitmap into greyscale', bmp);
-
-  //TODO: Figure out a way to validate that the bmp instance is actually valid before trying to transform it
-  // console.log(bmp);
-  //TODO: alter bmp to make the image greyscale ...
-  for (let i = 0; i < bmp.colorArray.length; i+=4) {
-    if (bmp.colorArray[i] > 130) {
-      bmp.colorArray[i] -= 150;
-      bmp.colorArray[i+1] -= 150;
-      bmp.colorArray[i+2] -= 150;
-    } else {
-      bmp.colorArray[i] += 150;
-      bmp.colorArray[i+1] += 150;
-      bmp.colorArray[i+2] += 150;
+  if (!validateBMP(bmp)) console.error('Invalid file type!');
+  else {
+    //TODO: Figure out a way to validate that the bmp instance is actually valid before trying to transform it
+    // console.log(bmp);
+    //TODO: alter bmp to make the image greyscale ...
+    for (let i = 0; i < bmp.colorArray.length; i+=4) {
+      if (bmp.colorArray[i] > 130) {
+        bmp.colorArray[i] -= 150;
+        bmp.colorArray[i+1] -= 150;
+        bmp.colorArray[i+2] -= 150;
+      } else {
+        bmp.colorArray[i] += 150;
+        bmp.colorArray[i+1] += 150;
+        bmp.colorArray[i+2] += 150;
+      }
     }
+  }
+
+};
+
+const validateBMP = (bmp) => {
+  if (bmp.type === 'BM') {
+    return true;
+  } else {
+    return false;
   }
 };
 
