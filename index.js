@@ -71,9 +71,15 @@ const doTheInversion = (bmp) => {
   // console.log(bmp);
   //TODO: alter bmp to make the image greyscale ...
   for (let i = 0; i < bmp.colorArray.length; i+=4) {
-    bmp.colorArray[i] = bmp.colorArray[i+1];
-    bmp.colorArray[i+1] = bmp.colorArray[i+2];
-    bmp.colorArray[i+2] = bmp.colorArray[i];
+    if (bmp.colorArray[i] > 130) {
+      bmp.colorArray[i] -= 150;
+      bmp.colorArray[i+1] -= 150;
+      bmp.colorArray[i+2] -= 150;
+    } else {
+      bmp.colorArray[i] += 150;
+      bmp.colorArray[i+1] += 150;
+      bmp.colorArray[i+2] += 150;
+    }
   }
 };
 
