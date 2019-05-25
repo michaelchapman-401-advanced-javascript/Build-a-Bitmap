@@ -1,6 +1,8 @@
 'use strict';
 
 const fs = require('fs');
+const readFile = require('./lib/readfile.js');
+const writeFile = require('./lib/writefile.js');
 
 const FILE_TYPE_OFFSET = 0;
 const FILE_SIZE_OFFSET = 2;
@@ -32,6 +34,7 @@ Bitmap.prototype.parse = function(buffer) {
   this.heigt = buffer.readInt32LE(HEIGHT_OFFSET);
   this.bytesPerPixel = buffer.readInt32LE(BYTES_PER_PIXEL_OFFSET);
   this.colorArray = buffer.slice(COLOR_TABLE_OFFSET, this.pixelOffset);
+  this.pixelData = buffer.slice(this.pixelOffset);
 };
 
 /**
@@ -45,96 +48,23 @@ Bitmap.prototype.transform = function(operation) {
 };
 
 /**
- * Sample Transformer (greyscale)
- * Would be called by Bitmap.transform('greyscale')
- * Pro Tip: Use "pass by reference" to alter the bitmap's buffer in place so you don't have to pass it around ...
- * @param bmp
- */
-const transformGreyscale = (bmp) => {
-  console.log('Transforming bitmap into greyscale', bmp);
-  if (!validateBMP(bmp)) console.error('Invalid file type!');
-  else {
-    //TODO: Figure out a way to validate that the bmp instance is actually valid before trying to transform it
-    // console.log(bmp);
-    //TODO: alter bmp to make the image greyscale ...
-    for (let i = 0; i < bmp.colorArray.length; i+=4) {
-      let gray = (bmp.colorArray[i] + bmp.colorArray[i+1] + bmp.colorArray[i+2]);
-      bmp.colorArray[i] = gray;
-      bmp.colorArray[i+1] = gray;
-      bmp.colorArray[i+2] = gray;
-    }
-  }
-};
-
-const doTheInversion = (bmp) => {
-  console.log('Transforming bitmap into greyscale', bmp);
-  if (!validateBMP(bmp)) console.error('Invalid file type!');
-  else {
-    //TODO: Figure out a way to validate that the bmp instance is actually valid before trying to transform it
-    // console.log(bmp);
-    //TODO: alter bmp to make the image greyscale ...
-    for (let i = 0; i < bmp.colorArray.length; i+=4) {
-      if (bmp.colorArray[i] > 130) {
-        bmp.colorArray[i] -= 150;
-        bmp.colorArray[i+1] -= 150;
-        bmp.colorArray[i+2] -= 150;
-      } else {
-        bmp.colorArray[i] += 150;
-        bmp.colorArray[i+1] += 150;
-        bmp.colorArray[i+2] += 150;
-      }
-    }
-  }
-};
-
-const discovery = (bmp) => {
-  console.log('DISCOVER');
-
-  bmp.pixelOffset = 10;
-};
-
-const validateBMP = (bmp) => {
-  if (bmp.type === 'BM') {
-    return true;
-  } else {
-    return false;
-  }
-};
-
-/**
  * A dictionary of transformations
  * Each property represents a transformation that someone could enter on the command line and then a function that would be called on the bitmap to do this job
  */
 const transforms = {
-  greyscale: transformGreyscale,
-  invert: doTheInversion,
-  discover: discovery,
+  greyscale: require('./lib/greyscale.js'),
+  invert: require('./lib/inversion.js'),
+  pixelfy: require('./lib/pixelate.js'),
 };
 
 // ------------------ GET TO WORK ------------------- //
-
 function transformWithCallbacks() {
-
-  fs.readFile(file, (err, buffer) => {
-
-    if (err) {
-      throw err;
-    }
-
-    bitmap.parse(buffer);
-
-    bitmap.transform(operation);
-
-    // Note that this has to be nested!
-    // Also, it uses the bitmap's instance properties for the name and thew new buffer
-    fs.writeFile(bitmap.newFile, bitmap.buffer, (err, out) => {
-      if (err) {
-        throw err;
-      }
-      console.log(`Bitmap Transformed: ${bitmap.newFile}`);
+  readFile(bitmap.file)
+    .then(buffer => {
+      bitmap.parse(buffer);
+      bitmap.transform(operation);
+      writeFile(bitmap);
     });
-
-  });
 }
 
 // TODO: Explain how this works (in your README)
@@ -143,4 +73,3 @@ const [file, operation] = process.argv.slice(2);
 let bitmap = new Bitmap(file);
 
 transformWithCallbacks();
-
