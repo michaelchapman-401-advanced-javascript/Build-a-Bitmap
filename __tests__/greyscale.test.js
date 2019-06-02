@@ -13,11 +13,16 @@ describe('Greyscale Module', () => {
     width: 110,
     heigt: 125,
     bytesPerPixel: 8,
-    colorArray: [],
-    pixelData: []
+    colorArray: [7, 150, 23, 1],
+    pixelData: [],
   };
 
-  it('Should take an object', () => {
-    expect(greyscale(obj)).toBeDefined();
+  it('Properly greyscales a bitmap', () => {
+    greyscale(obj);
+
+    expect(obj.colorArray[0]).toEqual(60);
+    expect(obj.colorArray[1]).toEqual(60);
+    expect(obj.colorArray[2]).toEqual(60);
+    expect(obj.colorArray[3]).toEqual(1);
   });
 });
