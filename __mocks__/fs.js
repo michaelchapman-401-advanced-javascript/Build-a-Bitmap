@@ -10,7 +10,7 @@ exports.readFile = (file, cb) => {
   }
 };
 
-exports.writeFile = (file, cb) => {
+exports.writeFile = (file, buffer, cb) => {
   if(file.match(/bad/i)){
     cb('Invalid file');
   }else{
