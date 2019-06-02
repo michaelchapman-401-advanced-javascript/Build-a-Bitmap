@@ -5,7 +5,6 @@ jest.mock('fs');
 const writefile = require('../lib/writefile.js');
 
 describe('writefile Module', () => {
-
   it('Should take an object', () => {
     let file = 'File Contents';
     let obj = {
