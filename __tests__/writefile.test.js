@@ -28,7 +28,7 @@ describe('writefile Module', () => {
       });
   });
 
-  it('If given a bad should return error', () => {
+  it('If given a bad file should return error', () => {
     let files = ['bad.txt'];
 
     return writefile(files)
