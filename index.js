@@ -1,6 +1,16 @@
 'use strict';
 
 const fs = require('fs');
+const readFile = require('./lib/readfile.js');
+const writeFile = require('./lib/writefile.js');
+
+const FILE_TYPE_OFFSET = 0;
+const FILE_SIZE_OFFSET = 2;
+const PIXEL_OFFSET = 10;
+const WIDTH_OFFSET = 18;
+const HEIGHT_OFFSET = 22;
+const BYTES_PER_PIXEL_OFFSET = 28;
+const COLOR_TABLE_OFFSET = 54;
 
 /**
  * Bitmap -- receives a file name, used in the transformer to note the new buffer
@@ -17,8 +27,14 @@ function Bitmap(filePath) {
  */
 Bitmap.prototype.parse = function(buffer) {
   this.buffer = buffer;
-  this.type = buffer.toString('utf-8', 0, 2);
-  //... and so on
+  this.type = buffer.toString('utf-8', FILE_TYPE_OFFSET, 2);
+  this.fileSize = buffer.readInt32LE(FILE_SIZE_OFFSET);
+  this.pixelOffset = buffer.readInt32LE(PIXEL_OFFSET);
+  this.width = buffer.readInt32LE(WIDTH_OFFSET);
+  this.heigt = buffer.readInt32LE(HEIGHT_OFFSET);
+  this.bytesPerPixel = buffer.readInt32LE(BYTES_PER_PIXEL_OFFSET);
+  this.colorArray = buffer.slice(COLOR_TABLE_OFFSET, this.pixelOffset);
+  this.pixelData = buffer.slice(this.pixelOffset);
 };
 
 /**
@@ -32,58 +48,23 @@ Bitmap.prototype.transform = function(operation) {
 };
 
 /**
- * Sample Transformer (greyscale)
- * Would be called by Bitmap.transform('greyscale')
- * Pro Tip: Use "pass by reference" to alter the bitmap's buffer in place so you don't have to pass it around ...
- * @param bmp
- */
-const transformGreyscale = (bmp) => {
-
-  console.log('Transforming bitmap into greyscale', bmp);
-
-  //TODO: Figure out a way to validate that the bmp instance is actually valid before trying to transform it
-
-  //TODO: alter bmp to make the image greyscale ...
-
-};
-
-const doTheInversion = (bmp) => {
-  bmp = {};
-}
-
-/**
  * A dictionary of transformations
  * Each property represents a transformation that someone could enter on the command line and then a function that would be called on the bitmap to do this job
  */
 const transforms = {
-  greyscale: transformGreyscale,
-  invert: doTheInversion
+  greyscale: require('./lib/greyscale.js'),
+  invert: require('./lib/inversion.js'),
+  pixelfy: require('./lib/pixelate.js'),
 };
 
 // ------------------ GET TO WORK ------------------- //
-
 function transformWithCallbacks() {
-
-  fs.readFile(file, (err, buffer) => {
-
-    if (err) {
-      throw err;
-    }
-
-    bitmap.parse(buffer);
-
-    bitmap.transform(operation);
-
-    // Note that this has to be nested!
-    // Also, it uses the bitmap's instance properties for the name and thew new buffer
-    fs.writeFile(bitmap.newFile, bitmap.buffer, (err, out) => {
-      if (err) {
-        throw err;
-      }
-      console.log(`Bitmap Transformed: ${bitmap.newFile}`);
+  readFile(bitmap.file)
+    .then(buffer => {
+      bitmap.parse(buffer);
+      bitmap.transform(operation);
+      writeFile(bitmap);
     });
-
-  });
 }
 
 // TODO: Explain how this works (in your README)
@@ -92,4 +73,3 @@ const [file, operation] = process.argv.slice(2);
 let bitmap = new Bitmap(file);
 
 transformWithCallbacks();
-
